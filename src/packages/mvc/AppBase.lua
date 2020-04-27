@@ -4,8 +4,9 @@ local AppBase = class("AppBase")
 function AppBase:ctor(configs)
     self.configs_ = {
         viewsRoot  = "app.views",
-        modelsRoot = "app.models",
-        defaultSceneName = "MainScene",
+        modelsRoot = "app.data",
+        scenesRoot = "app.scene",
+        defaultSceneName = "LoadScene",
     }
 
     for k, v in pairs(configs or {}) do
@@ -17,6 +18,9 @@ function AppBase:ctor(configs)
     end
     if type(self.configs_.modelsRoot) ~= "table" then
         self.configs_.modelsRoot = {self.configs_.modelsRoot}
+    end
+    if type(self.configs_.scenesRoot) ~= "table" then
+        self.configs_.scenesRoot = {self.configs_.scenesRoot}
     end
 
     if DEBUG > 1 then
@@ -37,9 +41,28 @@ function AppBase:run(initSceneName)
 end
 
 function AppBase:enterScene(sceneName, transition, time, more)
-    local view = self:createView(sceneName)
+    local view = self:createScene(sceneName)
     view:showWithScene(transition, time, more)
     return view
+end
+
+function AppBase:createScene(name)
+    for _, root in ipairs(self.configs_.scenesRoot) do
+        local packageName = string.format("%s.%s", root, name)
+        local status, scene = xpcall(function()
+                return require(packageName)
+            end, function(msg)
+            if not string.find(msg, string.format("'%s' not found:", packageName)) then
+                print("load scene error: ", msg)
+            end
+        end)
+        local t = type(scene)
+        if status and (t == "table" or t == "userdata") then
+            return scene:create(self, name)
+        end
+    end
+    error(string.format("AppBase:createView() - not found scene \"%s\" in search paths \"%s\"",
+        name, table.concat(self.configs_.scenesRoot, ",")), 0)
 end
 
 function AppBase:createView(name)

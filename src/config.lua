@@ -1,20 +1,20 @@
 
--- 0 - disable debug info, 1 - less debug info, 2 - verbose debug info
+-- 调试模式级别
 DEBUG = 2
 
--- use framework, will disable all deprecated API, false - use legacy API
+-- 是否使用框架接口
 CC_USE_FRAMEWORK = true
 
--- show FPS on screen
+-- 是否显示帧率
 CC_SHOW_FPS = true
 
--- disable create unexpected global variable
+-- 是否禁止随意创建全局变量
 CC_DISABLE_GLOBAL = true
 
--- for module display
+-- 显示适配
 CC_DESIGN_RESOLUTION = {
-    width = 960,
-    height = 640,
+    width = 1280,
+    height = 720,
     autoscale = "FIXED_HEIGHT",
     callback = function(framesize)
         local ratio = framesize.width / framesize.height
